@@ -27,6 +27,7 @@ import { SignaturePad } from "@/components/ui/signature-pad"
 import { TermsAndConditionsDialog } from "@/components/terms-and-conditions-dialog"
 import { MultiSelect } from "@/components/multi-select"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { Loader } from "@/components/ui/loader"
 
 // Create a properly typed schema
 const membershipFormSchema = z.object({
@@ -123,6 +124,7 @@ export default function MembershipForm() {
   const [isTermsDialogOpen, setIsTermsDialogOpen] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const methods = useForm<MembershipFormData>({
     resolver: zodResolver(membershipFormSchema),
@@ -167,11 +169,19 @@ export default function MembershipForm() {
       })
       return
     }
+
+    // Start loading
+    setIsSubmitting(true)
     console.log("Form submitted:", data)
+  }
+
+  const handleSubmissionComplete = () => {
+    // This runs after the 1500ms loader finishes
+    const data = watch() // Get current form data
     
     // Show success toast with membership tier styling
     toast.success(
-      `🎉 Welcome to Grand Hotel! Your ${data.preferredTier?.charAt(0).toUpperCase() + data.preferredTier?.slice(1)} membership has been submitted successfully!`,
+      `🎉 Welcome to Grand Hotel! Your ${selectedTier?.charAt(0).toUpperCase() + selectedTier?.slice(1)} membership has been submitted successfully!`,
       {
         duration: 6000,
         style: {
@@ -211,6 +221,7 @@ export default function MembershipForm() {
     }) // Reset form fields
     setTermsAccepted(false) // Reset terms acceptance
     setCurrentStep(0) // Reset to first step
+    setIsSubmitting(false) // Reset loading state
   }
 
   const handleTermsAccept = () => {
@@ -291,6 +302,11 @@ export default function MembershipForm() {
   const currentFormFields = formFields.filter((field) => currentStepFields.includes(field.name))
 
   return (
+    <Loader 
+      isLoading={isSubmitting} 
+      onComplete={handleSubmissionComplete}
+      duration={1500}
+    >
     <div className="min-h-screen relative p-4 sm:p-6 lg:p-6 transition-colors duration-300">
       {/* Brick Background Image */}
       <div 
@@ -750,5 +766,6 @@ export default function MembershipForm() {
         />
       </div>
     </div>
+    </Loader>
   )
 }
