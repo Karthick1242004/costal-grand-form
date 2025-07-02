@@ -1,0 +1,39 @@
+# Node
+node_modules/
+.env*
+
+# Next.js
+.next/
+out/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Build
+build/
+dist/
+
+# Misc
+coverage/
+*.local
+*.log
+
+# Optional lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Static exports
+exported/ 
