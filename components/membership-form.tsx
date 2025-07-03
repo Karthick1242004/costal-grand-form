@@ -62,7 +62,7 @@ export default function MembershipForm() {
   // Custom hook for form persistence
   useFormPersistence("hotel-membership-form", useMembershipStore, methods)
 
-  const onSubmit = (data: MembershipFormData) => {
+  const onSubmit = async (data: MembershipFormData) => {
     if (!termsAccepted) {
       setIsTermsDialogOpen(true)
       toast.error("Please accept the Terms and Conditions to proceed.", {
@@ -81,18 +81,73 @@ export default function MembershipForm() {
 
     // Start loading
     setIsSubmitting(true)
-    console.log("Form submitted:", data)
+    
+    try {
+      // Convert form data to FormData for submission
+      const formData = new FormData()
+      
+      // Add all form fields to FormData
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            // Handle array fields (cuisinePreference, preferredContactMethod, etc.)
+            value.forEach((item) => {
+              formData.append(`${key}[]`, item.toString())
+            })
+          } else if (value instanceof Date) {
+            // Handle date fields
+            formData.append(key, value.toISOString())
+          } else {
+            // Handle all other fields
+            formData.append(key, value.toString())
+          }
+        }
+      })
+
+      // Submit to API
+      const response = await fetch('/api/membership', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        // Store the membership ID for success message
+        sessionStorage.setItem('membershipId', result.membershipId)
+        console.log("Form submitted successfully:", result)
+      } else {
+        throw new Error(result.message || 'Failed to submit membership application')
+      }
+    } catch (error) {
+      console.error('Submission error:', error)
+      setIsSubmitting(false)
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to submit membership application. Please try again.',
+        {
+          duration: 5000,
+          style: {
+            background: "#ef4444",
+            color: "#ffffff",
+            fontSize: "14px",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            border: "none",
+          },
+        }
+      )
+    }
   }
 
   const handleSubmissionComplete = () => {
     // This runs after the 1500ms loader finishes
-    const data = watch() // Get current form data
+    const membershipId = sessionStorage.getItem('membershipId')
     
-    // Show success toast with membership tier styling
+    // Show success toast with membership tier styling and membership ID
     toast.success(
-      `🎉 Welcome to Coastal Grand Hotel! Your ${selectedTier?.charAt(0).toUpperCase() + selectedTier?.slice(1)} membership has been submitted successfully!`,
+      `🎉 Welcome to Coastal Grand Hotel! Your ${selectedTier?.charAt(0).toUpperCase() + selectedTier?.slice(1)} membership has been submitted successfully!${membershipId ? ` Your membership ID: ${membershipId}` : ''}`,
       {
-        duration: 6000,
+        duration: 8000,
         style: {
           background: selectedTier === "gold" 
             ? "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)"
@@ -115,6 +170,9 @@ export default function MembershipForm() {
         },
       }
     )
+    
+    // Clear the membership ID from session storage
+    sessionStorage.removeItem('membershipId')
     
     resetForm() // Clear persisted data
     reset(defaultFormValues) // Reset form fields
@@ -222,8 +280,18 @@ export default function MembershipForm() {
       {/* Additional Glass Effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent dark:via-black/30" />
 
-      {/* Theme Toggle */}
-      <div className="fixed top-4 right-4 z-50">
+      {/* Theme Toggle and Admin Link */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          asChild
+          className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm"
+        >
+          <a href="/admin" target="_blank" rel="noopener noreferrer">
+            👥 Admin
+          </a>
+        </Button>
         <ThemeToggle />
       </div>
 
