@@ -30,7 +30,7 @@ export function useFormPersistence(
   useEffect(() => {
     const subscription = formMethods.watch((value, { name, type }) => {
       // Only update the store if it's a user input change
-      if (type === "change" || type === "blur" || type === "submit") {
+      if (type && name) {
         setFormData(value)
       }
     })

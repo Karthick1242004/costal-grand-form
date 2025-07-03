@@ -8,7 +8,6 @@ export default function HomePage() {
   const [isInitialLoading, setIsInitialLoading] = useState(true)
 
   useEffect(() => {
-    // Simulate initial page load time
     const timer = setTimeout(() => {
       setIsInitialLoading(false)
     }, 1500)

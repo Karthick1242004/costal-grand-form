@@ -73,26 +73,6 @@ export const useMembershipStore = create<MembershipStore>()(
     {
       name: "hotel-membership-form", // unique name for local storage key
       storage: createJSONStorage(() => localStorage),
-      // Custom serialization and deserialization
-      serialize: (state) => {
-        return JSON.stringify({
-          ...state,
-          state: {
-            ...state.state,
-            formData: serializeDates(state.state.formData),
-          },
-        })
-      },
-      deserialize: (str) => {
-        const parsed = JSON.parse(str)
-        return {
-          ...parsed,
-          state: {
-            ...parsed.state,
-            formData: hydrateDates(parsed.state.formData),
-          },
-        }
-      },
       // Optional: Partialize the state to only store formData
       partialize: (state) => ({ formData: state.formData }),
     },

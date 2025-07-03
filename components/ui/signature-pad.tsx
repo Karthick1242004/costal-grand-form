@@ -5,7 +5,7 @@ import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-interface SignaturePadProps extends React.HTMLAttributes<HTMLCanvasElement> {
+interface SignaturePadProps extends Omit<React.HTMLAttributes<HTMLCanvasElement>, 'onChange'> {
   value?: string // Base64 image data
   onChange?: (value: string | null) => void
   disabled?: boolean
