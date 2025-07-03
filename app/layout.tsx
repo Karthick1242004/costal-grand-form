@@ -12,7 +12,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Grand Hotel Membership",
+  title: "Coastal Grand Membership",
   description: "Join our exclusive membership program",
     generator: 'v0.dev'
 }

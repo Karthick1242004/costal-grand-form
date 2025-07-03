@@ -20,9 +20,9 @@ interface TermsAndConditionsDialogProps {
 }
 
 const TERMS_AND_CONDITIONS_TEXT = `
-Welcome to the Grand Hotel Membership Program! By becoming a member, you agree to the following terms and conditions. Please read them carefully.
+Welcome to the Coastal Grand Hotel Membership Program! By becoming a member, you agree to the following terms and conditions. Please read them carefully.
 
-1.  **Membership Eligibility:** Membership is open to individuals aged 18 years or older. The Grand Hotel reserves the right to refuse or revoke membership at its sole discretion.
+1.  **Membership Eligibility:** Membership is open to individuals aged 18 years or older. The Coastal Grand Hotel reserves the right to refuse or revoke membership at its sole discretion.
 
 2.  **Membership Benefits:** Membership benefits are subject to change without prior notice. Benefits may include, but are not limited to, discounted room rates, exclusive access to hotel facilities, special offers, and loyalty points. Specific benefits depend on your chosen membership tier (Bronze, Silver, Gold, Platinum).
 

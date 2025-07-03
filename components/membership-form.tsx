@@ -90,7 +90,7 @@ export default function MembershipForm() {
     
     // Show success toast with membership tier styling
     toast.success(
-      `🎉 Welcome to Grand Hotel! Your ${selectedTier?.charAt(0).toUpperCase() + selectedTier?.slice(1)} membership has been submitted successfully!`,
+      `🎉 Welcome to Coastal Grand Hotel! Your ${selectedTier?.charAt(0).toUpperCase() + selectedTier?.slice(1)} membership has been submitted successfully!`,
       {
         duration: 6000,
         style: {
@@ -251,7 +251,7 @@ export default function MembershipForm() {
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-2">
                 <Crown className="h-10 w-10 text-white" />
-                <CardTitle className="text-3xl sm:text-5xl font-bold tracking-tight">Grand Hotel</CardTitle>
+                <CardTitle className="text-3xl sm:text-5xl font-bold tracking-tight">Coastal Grand Hotel</CardTitle>
               </div>
               <CardTitle className="text-xl sm:text-2xl font-semibold mb-2">Exclusive Membership</CardTitle>
 
@@ -595,7 +595,7 @@ export default function MembershipForm() {
                       >
                         Terms and Conditions
                       </span>{" "}
-                      of the Grand Hotel Membership Program.
+                      of the Coastal Grand Hotel Membership Program.
                     </Label>
                   </div>
                   {formState.isSubmitted && !termsAccepted && (
@@ -669,7 +669,7 @@ export default function MembershipForm() {
           <CardFooter className="bg-slate-50 dark:bg-slate-800/50 p-8 text-center border-t border-slate-200 dark:border-slate-700 transition-colors duration-300">
             <div className="w-full space-y-2">
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                &copy; {new Date().getFullYear()} Grand Hotel. All rights reserved.
+                &copy; {new Date().getFullYear()} Coastal Grand Hotel. All rights reserved.
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-500">
                 Your information is secure and will be used solely for membership purposes.
