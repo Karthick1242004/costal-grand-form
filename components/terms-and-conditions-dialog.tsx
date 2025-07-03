@@ -22,15 +22,15 @@ interface TermsAndConditionsDialogProps {
 const TERMS_AND_CONDITIONS_TEXT = `
 Welcome to the Coastal Grand Hotel Membership Program! By becoming a member, you agree to the following terms and conditions. Please read them carefully.
 
-1.  **Membership Eligibility:** Membership is open to individuals aged 18 years or older. The Coastal Grand Hotel reserves the right to refuse or revoke membership at its sole discretion.
+1. Membership Eligibility: Membership is open to individuals aged 18 years or older. The Coastal Grand Hotel reserves the right to refuse or revoke membership at its sole discretion.
 
-2.  **Membership Benefits:** Membership benefits are subject to change without prior notice. Benefits may include, but are not limited to, discounted room rates, exclusive access to hotel facilities, special offers, and loyalty points. Specific benefits depend on your chosen membership tier (Bronze, Silver, Gold, Platinum).
+2. Membership Benefits: Membership benefits are subject to change without prior notice. Benefits may include, but are not limited to, discounted room rates, exclusive access to hotel facilities, special offers, and loyalty points. Specific benefits depend on your chosen membership tier (Bronze, Silver, Gold, Platinum).
 
-3.  **Membership Tiers:**
-    *   **Bronze:** Basic discounts, newsletter access.
-    *   **Silver:** Enhanced discounts, early check-in/late check-out (subject to availability).
-    *   **Gold:** Premium discounts, complimentary breakfast, room upgrades (subject to availability).
-    *   **Platinum:** VIP treatment, dedicated concierge, executive lounge access, complimentary airport transfers.
+3. Membership Tiers:
+   - Bronze: Basic discounts, newsletter access.
+   - Silver: Enhanced discounts, early check-in/late check-out (subject to availability).
+   - Gold: Premium discounts, complimentary breakfast, room upgrades (subject to availability).
+   - Platinum: VIP treatment, dedicated concierge, executive lounge access, complimentary airport transfers.
 
 4.  **Data Privacy:** We are committed to protecting your privacy. All personal information collected will be used in accordance with our Privacy Policy, available on our website. By signing up, you consent to the collection and use of your data as described therein.
 
