@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useReactToPrint } from 'react-to-print'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -8,11 +9,12 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Crown, Users, Calendar, Phone, Mail, MapPin, CreditCard, Trash2, RefreshCw, Search, Eye } from 'lucide-react'
+import { Crown, Users, Calendar, Phone, Mail, MapPin, CreditCard, Trash2, RefreshCw, Search, Eye, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
+import { MembershipReport, type FullMembershipData } from '@/components/membership-report'
 
 interface MembershipData {
   _id: string
@@ -28,34 +30,6 @@ interface MembershipData {
   submittedAt: string
   city: string
   state: string
-}
-
-interface FullMembershipData {
-  _id: string
-  id: string
-  memberType: string
-  salutation: string
-  firstName: string
-  lastName: string
-  dateOfBirth: string
-  occupation: string
-  profession: string
-  annualIncome: string
-  contactEmail: string
-  contactMobile: string
-  premisesName: string
-  roadStreetLane: string
-  city: string
-  state: string
-  country: string
-  postalCode: string
-  membershipCategory: string
-  membershipYears: string
-  membershipPrice: string
-  paymentMode: string
-  status: string
-  submittedAt: string
-  [key: string]: any
 }
 
 interface PaginationData {
@@ -133,6 +107,30 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedMember, setSelectedMember] = useState<FullMembershipData | null>(null)
   const [viewDetailsLoading, setViewDetailsLoading] = useState(false)
+  
+  // Report related state
+  const [allMembersForReport, setAllMembersForReport] = useState<FullMembershipData[]>([])
+  const [reportLoading, setReportLoading] = useState(false)
+  const [showReport, setShowReport] = useState(false)
+  const componentRef = useRef<HTMLDivElement>(null)
+
+  // Print/Download functionality
+  const handlePrint = useReactToPrint({
+    contentRef: componentRef,
+    documentTitle: `Coastal-Grand-Hotel-Membership-Report-${new Date().toISOString().split('T')[0]}`,
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 0.5in;
+      }
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact;
+          color-adjust: exact;
+        }
+      }
+    `
+  })
 
   const fetchMemberships = async () => {
     try {
@@ -194,6 +192,60 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       alert('Network error occurred')
+    }
+  }
+
+  const fetchAllMembersForReport = async () => {
+    try {
+      setReportLoading(true)
+      setError(null)
+      
+      // First, get the list of all member IDs
+      const response = await fetch('/api/membership/admin?limit=1000&skip=0')
+      const data = await response.json()
+
+      if (data.success) {
+        // For now, we'll use the summary data from the API
+        // If full details are needed, we could fetch each member individually
+        // but that would be resource intensive
+        
+        // Convert summary data to full data format for the report
+        const fullMemberData: FullMembershipData[] = data.data.map((member: any) => ({
+          _id: member._id,
+          id: member.membershipId,
+          memberType: 'individual', // Default value
+          salutation: '', // Will be extracted from name if available
+          firstName: member.name.split(' ')[0] || '',
+          lastName: member.name.split(' ').slice(1).join(' ') || '',
+          dateOfBirth: '',
+          occupation: '',
+          profession: '',
+          annualIncome: '',
+          contactEmail: member.email,
+          contactMobile: member.mobile,
+          premisesName: '',
+          roadStreetLane: '',
+          city: member.city,
+          state: member.state,
+          country: 'India',
+          postalCode: '',
+          membershipCategory: member.membershipCategory,
+          membershipYears: member.membershipYears,
+          membershipPrice: member.membershipPrice,
+          paymentMode: member.paymentMode,
+          status: member.status,
+          submittedAt: member.submittedAt
+        }))
+
+        setAllMembersForReport(fullMemberData)
+        setShowReport(true)
+      } else {
+        setError(data.message || 'Failed to fetch members for report')
+      }
+    } catch (err) {
+      setError('Network error occurred while generating report')
+    } finally {
+      setReportLoading(false)
     }
   }
 
@@ -351,6 +403,19 @@ export default function AdminDashboard() {
 
                 <Button onClick={fetchMemberships} variant="outline" size="icon">
                   <RefreshCw className="h-4 w-4" />
+                </Button>
+                
+                <Button 
+                  onClick={fetchAllMembersForReport} 
+                  disabled={reportLoading}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  {reportLoading ? (
+                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Download className="h-4 w-4 mr-2" />
+                  )}
+                  {reportLoading ? 'Generating...' : 'Download Report'}
                 </Button>
               </div>
             </div>
@@ -674,6 +739,32 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Report Dialog */}
+      <Dialog open={showReport} onOpenChange={setShowReport}>
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Membership Report</span>
+              <div className="flex items-center gap-2">
+                <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700">
+                  <Download className="h-4 w-4 mr-2" />
+                  Print/Download PDF
+                </Button>
+                <Button onClick={() => setShowReport(false)} variant="outline">
+                  Close
+                </Button>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[70vh]">
+            <MembershipReport 
+              members={allMembersForReport} 
+              forwardedRef={componentRef}
+            />
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 } 
