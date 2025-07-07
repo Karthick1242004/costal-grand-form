@@ -43,11 +43,18 @@ export async function POST(request: NextRequest) {
     const result = await collection.insertOne(membershipData)
 
     if (result.insertedId) {
+      // Add the MongoDB _id to the membership data
+      const responseData = {
+        ...membershipData,
+        _id: result.insertedId.toString()
+      }
+
       return NextResponse.json({
         success: true,
         message: 'Membership application submitted successfully',
         membershipId: membershipData.id,
-        insertedId: result.insertedId
+        insertedId: result.insertedId,
+        membershipData: responseData
       }, { status: 201 })
     } else {
       throw new Error('Failed to insert membership data')

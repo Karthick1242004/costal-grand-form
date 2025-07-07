@@ -26,6 +26,7 @@ import { TermsAndConditionsDialog } from "@/components/terms-and-conditions-dial
 import { MultiSelect } from "@/components/multi-select"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Loader } from "@/components/ui/loader"
+import UserMembershipReport, { type UserMembershipData } from "@/components/user-membership-report"
 
 // Import from the new metadata files
 import { 
@@ -42,6 +43,8 @@ export default function MembershipForm() {
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showReport, setShowReport] = useState(false)
+  const [submittedMemberData, setSubmittedMemberData] = useState<UserMembershipData | null>(null)
 
   const methods = useForm<MembershipFormData>({
     resolver: zodResolver(membershipFormSchema),
@@ -113,7 +116,8 @@ export default function MembershipForm() {
       const result = await response.json()
 
       if (response.ok && result.success) {
-        // Store the membership ID for success message
+        // Store the membership data and show the report
+        setSubmittedMemberData(result.membershipData)
         sessionStorage.setItem('membershipId', result.membershipId)
         console.log("Form submitted successfully:", result)
       } else {
@@ -143,33 +147,44 @@ export default function MembershipForm() {
     // This runs after the 1500ms loader finishes
     const membershipId = sessionStorage.getItem('membershipId')
     
-    // Show success toast with membership tier styling and membership ID
-    toast.success(
-      `🎉 Welcome to Coastal Grand Hotel! Your ${selectedTier?.charAt(0).toUpperCase() + selectedTier?.slice(1)} membership has been submitted successfully!${membershipId ? ` Your membership ID: ${membershipId}` : ''}`,
-      {
-        duration: 8000,
-        style: {
-          background: selectedTier === "gold" 
-            ? "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)"
-            : selectedTier === "platinum"
-            ? "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)"
-            : selectedTier === "silver"
-            ? "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)"
-            : selectedTier === "bronze"
-            ? "linear-gradient(135deg, #d97706 0%, #b45309 100%)"
-            : selectedTier === "diamond"
-            ? "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)"
-            : "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-          color: "#ffffff",
-          border: "none",
-          fontWeight: "600",
-          fontSize: "15px",
-          padding: "16px 20px",
-          borderRadius: "12px",
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
-        },
-      }
-    )
+    // Show the membership report instead of just a toast
+    if (submittedMemberData) {
+      setShowReport(true)
+      setIsSubmitting(false) // Reset loading state
+      
+      // Show a brief success toast
+      toast.success(
+        `🎉 Welcome to Coastal Grand Hotel! Your ${selectedTier?.charAt(0).toUpperCase() + selectedTier?.slice(1)} membership has been submitted successfully!`,
+        {
+          duration: 4000,
+          style: {
+            background: selectedTier === "gold" 
+              ? "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)"
+              : selectedTier === "platinum"
+              ? "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)"
+              : selectedTier === "silver"
+              ? "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)"
+              : selectedTier === "bronze"
+              ? "linear-gradient(135deg, #d97706 0%, #b45309 100%)"
+              : selectedTier === "diamond"
+              ? "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)"
+              : "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+            color: "#ffffff",
+            border: "none",
+            fontWeight: "600",
+            fontSize: "15px",
+            padding: "16px 20px",
+            borderRadius: "12px",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+          },
+        }
+      )
+    }
+  }
+
+  const handleCloseReport = () => {
+    setShowReport(false)
+    setSubmittedMemberData(null)
     
     // Clear the membership ID from session storage
     sessionStorage.removeItem('membershipId')
@@ -178,7 +193,6 @@ export default function MembershipForm() {
     reset(defaultFormValues) // Reset form fields
     setTermsAccepted(false) // Reset terms acceptance
     setCurrentStep(0) // Reset to first step
-    setIsSubmitting(false) // Reset loading state
   }
 
   const handleTermsAccept = () => {
@@ -751,6 +765,14 @@ export default function MembershipForm() {
           onAccept={handleTermsAccept}
           onClose={() => setIsTermsDialogOpen(false)}
         />
+
+        {/* Show membership report after successful submission */}
+        {showReport && submittedMemberData && (
+          <UserMembershipReport
+            memberData={submittedMemberData}
+            onClose={handleCloseReport}
+          />
+        )}
       </div>
     </div>
     </Loader>
