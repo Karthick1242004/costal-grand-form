@@ -9,12 +9,13 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Crown, Users, Calendar, Phone, Mail, MapPin, CreditCard, Trash2, RefreshCw, Search, Eye, Download } from 'lucide-react'
+import { Crown, Users, Calendar, Phone, Mail, MapPin, CreditCard, Trash2, RefreshCw, Search, Eye, FileDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { MembershipReport, type FullMembershipData } from '@/components/membership-report'
+import UserMembershipReport, { type UserMembershipData } from '@/components/user-membership-report'
 
 interface MembershipData {
   _id: string
@@ -113,6 +114,11 @@ export default function AdminDashboard() {
   const [reportLoading, setReportLoading] = useState(false)
   const [showReport, setShowReport] = useState(false)
   const componentRef = useRef<HTMLDivElement>(null)
+  
+  // Individual user report state
+  const [selectedUserReport, setSelectedUserReport] = useState<UserMembershipData | null>(null)
+  const [showUserReport, setShowUserReport] = useState(false)
+  const [userReportLoading, setUserReportLoading] = useState(false)
 
   // Print/Download functionality
   const handlePrint = useReactToPrint({
@@ -131,6 +137,8 @@ export default function AdminDashboard() {
       }
     `
   })
+
+
 
   const fetchMemberships = async () => {
     try {
@@ -246,6 +254,59 @@ export default function AdminDashboard() {
       setError('Network error occurred while generating report')
     } finally {
       setReportLoading(false)
+    }
+  }
+
+  const fetchIndividualUserReport = async (membershipId: string) => {
+    try {
+      setUserReportLoading(true)
+      const response = await fetch(`/api/membership/admin?membershipId=${membershipId}`)
+      const data = await response.json()
+      
+      if (data.success && data.data.length > 0) {
+        const member = data.data[0]
+        
+        // Transform the member data to UserMembershipData format
+        const userReportData: UserMembershipData = {
+          _id: member._id,
+          id: member.id,
+          memberType: member.memberType || 'individual',
+          salutation: member.salutation || '',
+          firstName: member.firstName || '',
+          lastName: member.lastName || '',
+          dateOfBirth: member.dateOfBirth || '',
+          occupation: member.occupation || '',
+          profession: member.profession || '',
+          annualIncome: member.annualIncome || '',
+          contactEmail: member.contactEmail || '',
+          contactMobile: member.contactMobile || '',
+          premisesName: member.premisesName || '',
+          roadStreetLane: member.roadStreetLane || '',
+          areaLocality: member.areaLocality || '',
+          city: member.city || '',
+          state: member.state || '',
+          country: member.country || 'India',
+          postalCode: member.postalCode || '',
+          membershipCategory: member.membershipCategory || '',
+          membershipYears: member.membershipYears || '',
+          membershipPrice: member.membershipPrice || '',
+          paymentMode: member.paymentMode || '',
+          downPaymentAmount: member.downPaymentAmount || '',
+          downPaymentOption: member.downPaymentOption || '',
+          status: member.status || 'pending',
+          submittedAt: member.submittedAt || new Date().toISOString()
+        }
+
+        setSelectedUserReport(userReportData)
+        setShowUserReport(true)
+      } else {
+        alert('Failed to fetch member details for report')
+      }
+    } catch (err) {
+      console.error('Failed to fetch member details:', err)
+      alert('Network error occurred while generating report')
+    } finally {
+      setUserReportLoading(false)
     }
   }
 
@@ -413,7 +474,7 @@ export default function AdminDashboard() {
                   {reportLoading ? (
                     <RefreshCw className="h-4 w-4 animate-spin mr-2" />
                   ) : (
-                    <Download className="h-4 w-4 mr-2" />
+                    <FileDown className="h-4 w-4 mr-2" />
                   )}
                   {reportLoading ? 'Generating...' : 'Download Report'}
                 </Button>
@@ -574,6 +635,20 @@ export default function AdminDashboard() {
                                 
                                 <Button 
                                   size="sm" 
+                                  variant="outline"
+                                  onClick={() => fetchIndividualUserReport(member.membershipId)}
+                                  disabled={userReportLoading}
+                                  className="bg-blue-50 hover:bg-blue-100 border-blue-200"
+                                >
+                                  {userReportLoading ? (
+                                    <RefreshCw className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <FileDown className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                
+                                <Button 
+                                  size="sm" 
                                   variant="destructive"
                                   onClick={() => deleteMembership(member.membershipId)}
                                 >
@@ -694,6 +769,21 @@ export default function AdminDashboard() {
                                     </ScrollArea>
                                   </DialogContent>
                                 </Dialog>
+                                
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => fetchIndividualUserReport(member.membershipId)}
+                                  disabled={userReportLoading}
+                                  className="bg-blue-50 hover:bg-blue-100 border-blue-200"
+                                >
+                                  {userReportLoading ? (
+                                    <RefreshCw className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <FileDown className="h-4 w-4" />
+                                  )}
+                                </Button>
+
                                 <Button 
                                   size="sm" 
                                   variant="destructive"
@@ -748,7 +838,7 @@ export default function AdminDashboard() {
               <span>Membership Report</span>
               <div className="flex items-center gap-2">
                 <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700">
-                  <Download className="h-4 w-4 mr-2" />
+                  <FileDown className="h-4 w-4 mr-2" />
                   Print/Download PDF
                 </Button>
                 <Button onClick={() => setShowReport(false)} variant="outline">
@@ -765,6 +855,15 @@ export default function AdminDashboard() {
           </ScrollArea>
         </DialogContent>
       </Dialog>
+
+             {/* Individual User Report Full-Page Overlay */}
+       {showUserReport && selectedUserReport && (
+         <UserMembershipReport
+           memberData={selectedUserReport}
+           onClose={() => setShowUserReport(false)}
+           showPrintOptions={true}
+         />
+       )}
     </div>
   )
 } 
