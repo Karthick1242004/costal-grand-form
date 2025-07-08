@@ -638,7 +638,7 @@ export default function AdminDashboard() {
                                   variant="outline"
                                   onClick={() => fetchIndividualUserReport(member.membershipId)}
                                   disabled={userReportLoading}
-                                  className="bg-blue-50 hover:bg-blue-100 border-blue-200"
+                                  className="bg-blue-600 hover:bg-blue-700"
                                 >
                                   {userReportLoading ? (
                                     <RefreshCw className="h-4 w-4 animate-spin" />
